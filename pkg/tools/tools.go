@@ -94,13 +94,15 @@ func WithOptionalJSONOutput() mcp.ToolOption {
 }
 
 // TextRenderOrJSON render a text/template.Template or a JSON string
-func TextRenderOrJSON(data any, tpl *template.Template, isJSON bool) *mcp.CallToolResult {
-	var (
-		err error
-		buf = bytes.NewBuffer(nil)
-	)
+func TextRenderOrJSON(data any, tpl *template.Template, request *mcp.CallToolRequest) *mcp.CallToolResult {
+	isJSON, err := GetParam[bool](request, keyIsJSON)
+	if err != nil {
+		return TextContentError(err)
+	}
 
-	if isJSON {
+	buf := bytes.NewBuffer(nil)
+	
+	if *isJSON {
 		err = json.NewEncoder(buf).Encode(data)
 	} else {
 		err = tpl.Execute(buf, data)
