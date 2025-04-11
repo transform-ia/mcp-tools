@@ -13,7 +13,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-const keyIsJSON = "json_output"
+const (
+	keyIsJSON = "json_output"
+	// GetParamError wrapping for GetParam
+	GetParamError = "GetParam"
+	// GetOptionalParamError wrapping for GetOptionalParam
+	GetOptionalParamError = "GetOptionalParam"
+	// ServerAddToolsError wrapping for ServerAddTools
+	ServerAddToolsError = "ServerAddTools"
+)
 
 // Tool are interface to a MCP tool implementation
 type Tool interface {
