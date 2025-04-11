@@ -14,6 +14,9 @@ env:
   GOLANGCI: "2.0.2-alpine"
 
 tasks:
+  ssh:
+    cmds:
+      - cp /root/.ssh-host/* /root/.ssh/
   upgrade:
     cmds:
       - go get -u ./...

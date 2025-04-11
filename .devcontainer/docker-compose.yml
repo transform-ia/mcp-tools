@@ -16,7 +16,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ..:/${PWD}:cached
-      - ${HOME}/.ssh:/root/.ssh:ro
+      - ${HOME}/.ssh:/root/.ssh-host:ro
       - ${HOME}/.docker:/root/.docker:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - golang-cache:/go/pkg

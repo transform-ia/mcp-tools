@@ -14,5 +14,4 @@ COPY --from=task /usr/local/bin/task /bin/task
 # bash is required for clive
 # hadolint ignore=DL3018
 RUN apk add --no-cache bash git gcc linux-headers musl-dev docker-cli openssh-client htop
-COPY github.pub /etc/ssh/ssh_known_hosts
 RUN ln -s /bin/golangci-lint-v2 /bin/golangci-lint
