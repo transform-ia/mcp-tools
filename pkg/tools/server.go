@@ -7,6 +7,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+// MustGetenvErrorFormat is a convenient error wrapper format
+const MustGetenvErrorFormat = "tools.MustGetenv(%q)"
+
 // MustGetenv get value from a environment variable
 func MustGetenv(keyName string) (*string, error) {
 	value := os.Getenv(keyName)
