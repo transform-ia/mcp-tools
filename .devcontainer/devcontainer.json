@@ -1,0 +1,20 @@
+{
+  "name": "MCP tools",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "mcp-tools",
+  "workspaceFolder": "${localWorkspaceFolder}",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "davidanson.vscode-markdownlint",
+        "github.vscode-pull-request-github",
+        "golang.go",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml",
+        "esbenp.prettier-vscode",
+        "saoudrizwan.claude-dev"
+      ]
+    }
+  },
+  "shutdownAction": "stopCompose"
+} 

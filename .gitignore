@@ -1,0 +1,6 @@
+/cmd/cmd
+/.task
+/.env
+# clide tasks drafts
+/tasks.md
+/mcp-server

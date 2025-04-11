@@ -1,0 +1,28 @@
+---
+volumes:
+  golang-cache:
+    name: golang-cache
+  alpine-cache:
+    name: alpine-cache
+
+services:
+  mcp-tools:
+    container_name: mcp-tools
+    hostname: mcp-tools
+    working_dir: ${PWD}
+    network_mode: host
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/${PWD}:cached
+      - ${HOME}/.ssh:/root/.ssh-host:ro
+      - ${HOME}/.docker:/root/.docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - golang-cache:/go/pkg
+      - alpine-cache:/var/cache/apk
+    command: /bin/bash -c "sleep 10000h"
+    restart: unless-stopped
+    environment:
+      GOPRIVATE: github.com/transform-ia/*
+      LANG: en_US.UTF-8

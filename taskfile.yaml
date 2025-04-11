@@ -1,0 +1,102 @@
+---
+version: '3'
+
+env:
+  # https://hub.docker.com/r/hadolint/hadolint/tags
+  HADOLINT: 2.12.1-beta-alpine
+  # https://hub.docker.com/r/pipelinecomponents/jsonlint/tags
+  JSONLINT: "0.22.2"
+  # https://hub.docker.com/r/pipelinecomponents/markdownlint/tags
+  MARKDOWNLINT: "0.14.0"
+  # https://hub.docker.com/r/pipelinecomponents/yamllint/tags
+  YAMLLINT: "0.34.0"
+  # https://hub.docker.com/r/golangci/golangci-lint/tags
+  GOLANGCI: "2.0.2-alpine"
+
+tasks:
+  upgrade:
+    cmds:
+      - go get -u ./...
+      - go mod tidy
+  format-golang:
+    sources:
+      - .golangci.yaml
+      - "*/**/*.go"
+    cmds:
+      - >
+        docker run --rm --interactive
+        --volume={{ .ROOT_DIR }}:/code/
+        --workdir=/code
+        golangci/golangci-lint:v${GOLANGCI}
+        golangci-lint fmt --fix -v
+  lint-docker:
+    sources:
+      - .vscode/Dockerfile
+      - taskfile.yaml
+    cmds:
+      - >
+        docker run --rm --interactive
+        hadolint/hadolint:v${HADOLINT}
+        < .devcontainer/Dockerfile
+  lint-json:
+    sources:
+      - .vscode/*.json
+      - .devcontainer/*.json
+      - taskfile.yaml
+    cmds:
+      - >
+        docker run --rm --interactive
+        --volume={{ .ROOT_DIR }}:/code/:ro
+        pipelinecomponents/jsonlint:${JSONLINT}
+        jsonlint --comments --quiet .vscode/*.json
+  lint-markdown:
+    sources:
+      - "*.md"
+      - taskfile.yaml
+    cmds:
+      - >
+        docker run --rm --interactive
+        --volume={{ .ROOT_DIR }}:/code/:ro
+        pipelinecomponents/markdownlint:${MARKDOWNLINT}
+        mdl --style all --warnings .
+  lint-yaml:
+    sources:
+      - "*.yaml"
+    cmds:
+      - >
+        docker run --rm --interactive
+        --volume={{ .ROOT_DIR }}:/code/:ro
+        pipelinecomponents/yamllint:${YAMLLINT}
+        yamllint .
+  lint-golang:
+    sources:
+      - .golangci.yaml
+      - "*/**/*.go"
+      - go.mod
+      - go.sum
+    cmds:
+      - >
+        docker run --rm --interactive
+        --volume={{ .ROOT_DIR }}:/code/:ro
+        --workdir=/code
+        golangci/golangci-lint:v${GOLANGCI}
+        golangci-lint run --fix -v
+  lint:
+    cmds:
+      - task: lint-docker
+      - task: lint-json
+      - task: lint-markdown
+      - task: lint-yaml
+      - task: lint-golang
+  build-golang:
+    sources:
+      - go.mod
+      - go.sum
+      - "*/**/*.go"
+    cmds:
+      - go mod tidy
+      - go build ./...
+  default:
+    cmds:
+      - task: lint
+      - task: build-golang

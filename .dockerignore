@@ -1,0 +1,11 @@
+*.yml
+*.yaml
+.*.yml
+.*.yaml
+*.md
+/.gitignore
+/.devcontainer
+/.vscode
+cmd/cmd
+/.task
+/.env
