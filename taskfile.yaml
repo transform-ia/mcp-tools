@@ -31,7 +31,7 @@ tasks:
         golangci-lint fmt --fix -v
   lint-docker:
     sources:
-      - .vscode/Dockerfile
+      - .devcontainer/Dockerfile
       - taskfile.yaml
     cmds:
       - >
