@@ -1,4 +1,3 @@
-// Package tools is a collection or utilities for MCP Server's tool
 package tools
 
 import (
