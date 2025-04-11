@@ -8,7 +8,7 @@ import (
 )
 
 // MustGetenvErrorFormat is a convenient error wrapper format
-const MustGetenvErrorFormat = "tools.MustGetenv(%q)"
+const MustGetenvErrorFormat = "tools.MustGetenv"
 
 // MustGetenv get value from a environment variable
 func MustGetenv(keyName string) (*string, error) {
