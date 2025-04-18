@@ -3,7 +3,7 @@ module github.com/transform-ia/mcp-tools
 go 1.24
 
 require (
-	github.com/mark3labs/mcp-go v0.19.0
+	github.com/mark3labs/mcp-go v0.21.1
 	github.com/pkg/errors v0.9.1
 )
 
