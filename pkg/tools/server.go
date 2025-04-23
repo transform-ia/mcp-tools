@@ -60,5 +60,9 @@ func GetEnvironmentStrings(prefix string) (map[string]string, error) {
 		}
 	}
 
+	if len(output) == 0 {
+		return nil, errors.New("No configuration found")
+	}
+
 	return output, nil
 }

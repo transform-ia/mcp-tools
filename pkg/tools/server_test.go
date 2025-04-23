@@ -11,7 +11,7 @@ func TestGetEnvironmentStrings(t *testing.T) {
 	os.Clearenv()
 
 	m, err := GetEnvironmentStrings("X")
-	assert.NoError(t, err)
+	assert.ErrorContains(t, err, "No configuration found")
 	assert.Empty(t, m)
 
 	os.Setenv("X_y", "abc")
@@ -26,12 +26,8 @@ func TestGetEnvironmentStrings(t *testing.T) {
 func TestGetEnvironmentURLS(t *testing.T) {
 	os.Clearenv()
 
-	m, err := GetEnvironmentURLS("X")
-	assert.NoError(t, err)
-	assert.Empty(t, m)
-
 	os.Setenv("X_y", "%$%@6^^")
-	m, err = GetEnvironmentURLS("X")
+	m, err := GetEnvironmentURLS("X")
 	assert.ErrorContains(t, err, "url.Parse")
 	assert.Empty(t, m)
 
