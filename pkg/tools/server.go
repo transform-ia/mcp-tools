@@ -1,15 +1,20 @@
 package tools
 
 import (
+	"maps"
 	"net/url"
 	"os"
 	"strings"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/pkg/errors"
 )
 
 // MustGetenvErrorFormat is a convenient error wrapper format
-const MustGetenvErrorFormat = "tools.MustGetenv"
+const (
+	MustGetenvErrorFormat = "tools.MustGetenv"
+	argumentConfiguration = "configuration"
+)
 
 // MustGetenv get value from a environment variable
 func MustGetenv(keyName string) (*string, error) {
@@ -40,6 +45,59 @@ func GetEnvironmentURLS(prefix string) (map[string]*url.URL, error) {
 	}
 
 	return output, nil
+}
+
+// WithConfigurationOption create a tool property to select a configuration key
+func WithConfigurationOption(m map[string]any) mcp.ToolOption {
+	const (
+		title       = "Configuration name"
+		description = "Which configuration use to perform MCP server operations"
+	)
+
+	var (
+		lenMap = len(m)
+		keys   = make([]string, lenMap)
+		index  = 0
+	)
+
+	for key := range maps.Keys(m) {
+		keys[index] = key
+		index++
+	}
+
+	if lenMap == 1 {
+		return mcp.WithString(
+			argumentConfiguration,
+			mcp.Required(),
+			mcp.Title(title),
+			mcp.Description(description),
+			mcp.DefaultString(keys[0]),
+			mcp.Enum(keys...),
+		)
+	}
+
+	return mcp.WithString(
+		argumentConfiguration,
+		mcp.Required(),
+		mcp.Title(title),
+		mcp.Description(description),
+		mcp.Enum(keys...),
+	)
+}
+
+// SelectFromConfiguration get the value of something based on MCP server request
+func SelectFromConfiguration[T any](m map[string]*T, request *mcp.CallToolRequest) (*T, error) {
+	config, err := GetParam[string](request, argumentConfiguration)
+	if err != nil {
+		return nil, errors.Wrap(err, GetParamError)
+	}
+
+	value, ok := m[*config]
+	if !ok {
+		return nil, errors.Errorf("invalid configuration %q", *config)
+	}
+
+	return value, nil
 }
 
 // GetEnvironmentStrings compile a list of string made from environment
