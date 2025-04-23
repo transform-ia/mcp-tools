@@ -48,7 +48,7 @@ func GetEnvironmentURLS(prefix string) (map[string]*url.URL, error) {
 }
 
 // WithConfigurationOption create a tool property to select a configuration key
-func WithConfigurationOption(m map[string]any) mcp.ToolOption {
+func WithConfigurationOption[T any](m map[string]*T) mcp.ToolOption {
 	const (
 		title       = "Configuration name"
 		description = "Which configuration use to perform MCP server operations"
