@@ -1,7 +1,7 @@
 {
   "name": "MCP tools",
   "dockerComposeFile": "docker-compose.yml",
-  "service": "mcp-tools",
+  "service": "devcontainer",
   "workspaceFolder": "${localWorkspaceFolder}",
   "customizations": {
     "vscode": {

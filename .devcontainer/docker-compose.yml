@@ -6,7 +6,7 @@ volumes:
     name: alpine-cache
 
 services:
-  mcp-tools:
+  devcontainer:
     container_name: mcp-tools
     hostname: mcp-tools
     working_dir: ${PWD}

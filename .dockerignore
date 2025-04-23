@@ -6,6 +6,6 @@
 /.gitignore
 /.devcontainer
 /.vscode
-cmd/cmd
+/cmd/cmd
 /.task
 /.env
