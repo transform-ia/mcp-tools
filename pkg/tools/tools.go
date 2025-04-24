@@ -101,7 +101,7 @@ func TextRenderOrJSON(data any, tpl *template.Template, request *mcp.CallToolReq
 	}
 
 	buf := bytes.NewBuffer(nil)
-	
+
 	if *isJSON {
 		err = json.NewEncoder(buf).Encode(data)
 	} else {
