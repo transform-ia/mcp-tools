@@ -1,12 +1,15 @@
 package tools
 
 import (
+	"fmt"
 	"maps"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/pkg/errors"
 )
 
@@ -22,6 +25,7 @@ func MustGetenv(keyName string) (*string, error) {
 	if len(value) == 0 {
 		return nil, errors.Errorf("missing environment variable %q", keyName)
 	}
+
 	return &value, nil
 }
 
@@ -48,19 +52,19 @@ func GetEnvironmentURLS(prefix string) (map[string]*url.URL, error) {
 }
 
 // WithConfigurationOption create a tool property to select a configuration key
-func WithConfigurationOption[T any](m map[string]*T) mcp.ToolOption {
+func WithConfigurationOption[T any](resources map[string]*T) mcp.ToolOption {
 	const (
 		title       = "Configuration name"
 		description = "Which configuration use to perform MCP server operations"
 	)
 
 	var (
-		lenMap = len(m)
+		lenMap = len(resources)
 		keys   = make([]string, lenMap)
 		index  = 0
 	)
 
-	for key := range maps.Keys(m) {
+	for key := range maps.Keys(resources) {
 		keys[index] = key
 		index++
 	}
@@ -86,13 +90,13 @@ func WithConfigurationOption[T any](m map[string]*T) mcp.ToolOption {
 }
 
 // SelectFromConfiguration get the value of something based on MCP server request
-func SelectFromConfiguration[T any](m map[string]*T, request *mcp.CallToolRequest) (*T, error) {
+func SelectFromConfiguration[T any](resources map[string]*T, request *mcp.CallToolRequest) (*T, error) {
 	config, err := GetParam[string](request, argumentConfiguration)
 	if err != nil {
 		return nil, errors.Wrap(err, GetParamError)
 	}
 
-	value, ok := m[*config]
+	value, ok := resources[*config]
 	if !ok {
 		return nil, errors.Errorf("invalid configuration %q", *config)
 	}
@@ -123,4 +127,36 @@ func GetEnvironmentStrings(prefix string) (map[string]string, error) {
 	}
 
 	return output, nil
+}
+
+// Serve either server a MCP server over stdin/stdout or HTTP
+// if the environment variable PORT is defined
+func Serve(srv *server.MCPServer) error {
+	const key = "PORT"
+
+	portStr := os.Getenv(key)
+	if len(portStr) != 0 {
+		port, err := strconv.ParseUint(portStr, 10, 8)
+		if err != nil {
+			return errors.Wrapf(
+				err,
+				"Can't parse environment variable %q value %q is not a number",
+				key,
+				portStr,
+			)
+		}
+
+		if err = server.NewSSEServer(
+			srv,
+			server.WithBasePath("/"),
+		).Start(fmt.Sprintf(":%d", port)); err != nil {
+			return errors.Wrap(err, "Start")
+		}
+	}
+
+	if err := server.ServeStdio(srv); err != nil {
+		return errors.Wrap(err, "server.ServeStdio")
+	}
+
+	return nil
 }
