@@ -5,40 +5,46 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetEnvironmentStrings(t *testing.T) {
+	t.Parallel()
 	os.Clearenv()
 
-	m, err := GetEnvironmentStrings("X")
-	assert.ErrorContains(t, err, "No configuration found")
-	assert.Empty(t, m)
+	value, err := GetEnvironmentStrings("X")
+	require.ErrorContains(t, err, "No configuration found")
+	assert.Empty(t, value)
 
-	os.Setenv("X_y", "abc")
-	m, err = GetEnvironmentStrings("X")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, m)
-	assert.Len(t, m, 1)
+	t.Setenv("X_y", "abc")
 
-	assert.Equal(t, "abc", m["y"])
+	value, err = GetEnvironmentStrings("X")
+	require.NoError(t, err)
+	assert.NotEmpty(t, value)
+	assert.Len(t, value, 1)
+
+	assert.Equal(t, "abc", value["y"])
 }
 
 func TestGetEnvironmentURLS(t *testing.T) {
+	t.Parallel()
 	os.Clearenv()
 
-	os.Setenv("X_y", "%$%@6^^")
-	m, err := GetEnvironmentURLS("X")
-	assert.ErrorContains(t, err, "url.Parse")
-	assert.Empty(t, m)
+	t.Setenv("X_y", "%$%@6^^")
+
+	value, err := GetEnvironmentURLS("X")
+	require.ErrorContains(t, err, "url.Parse")
+	assert.Empty(t, value)
 
 	os.Clearenv()
-	os.Setenv("X_y", "http://localhost/abc")
-	os.Setenv("X_z", "http://xxx.com/abc")
-	m, err = GetEnvironmentURLS("X")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, m)
-	assert.Len(t, m, 2)
+	t.Setenv("X_y", "http://localhost/abc")
+	t.Setenv("X_z", "http://xxx.com/abc")
 
-	assert.Equal(t, "localhost", m["y"].Hostname())
-	assert.Equal(t, "xxx.com", m["z"].Hostname())
+	value, err = GetEnvironmentURLS("X")
+	require.NoError(t, err)
+	assert.NotEmpty(t, value)
+	assert.Len(t, value, 2)
+
+	assert.Equal(t, "localhost", value["y"].Hostname())
+	assert.Equal(t, "xxx.com", value["z"].Hostname())
 }
