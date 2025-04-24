@@ -3,9 +3,9 @@
 # https://hub.docker.com/r/hadolint/hadolint/tags
 FROM hadolint/hadolint:v2.12.0-alpine AS hadolint
 # https://hub.docker.com/r/golangci/golangci-lint/tags
-FROM golangci/golangci-lint:v2.0.2-alpine AS golangci
+FROM golangci/golangci-lint:v2.1.2-alpine AS golangci
 # https://hub.docker.com/r/transformia/task/tags
-FROM transformia/task:3.42.1 as task
+FROM transformia/task:3.43.2 AS task
 # https://hub.docker.com/_/golang
 FROM golang:1.24.2-alpine3.21
 COPY --from=hadolint /bin/hadolint /bin/hadolint
