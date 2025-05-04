@@ -15,15 +15,15 @@ import (
 	"go.opentelemetry.io/otel/sdk/log"
 )
 
-// copied from https://raw.githubusercontent.com/open-telemetry/opentelemetry-go-contrib/refs/tags/exporters/autoexport/v0.60.0/exporters/autoexport/logs.go
-//
-//nolint:lll
-const otelExporterOTLPLogsProtoEnvKey = "OTEL_EXPORTER_OTLP_LOGS_PROTOCOL"
-
-// copied from https://github.com/open-telemetry/opentelemetry-go-contrib/blob/exporters/autoexport/v0.60.0/exporters/autoexport/registry.go
-//
-//nolint:lll
-const otelExporterOTLPProtoEnvKey = "OTEL_EXPORTER_OTLP_PROTOCOL"
+// OTLP environment variable keys
+const (
+	// otelExporterOTLPLogsProtoEnvKey is the environment variable key for logs protocol
+	otelExporterOTLPLogsProtoEnvKey = "OTEL_EXPORTER_OTLP_LOGS_PROTOCOL"
+	// otelExporterOTLPTracesProtoEnvKey is the environment variable key for traces protocol
+	otelExporterOTLPTracesProtoEnvKey = "OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"
+	// otelExporterOTLPProtoEnvKey is the general OTLP protocol environment variable key
+	otelExporterOTLPProtoEnvKey = "OTEL_EXPORTER_OTLP_PROTOCOL"
+)
 
 func init() {
 	// Register our composite exporter type
