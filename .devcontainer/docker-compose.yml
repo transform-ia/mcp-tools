@@ -16,6 +16,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ..:/${PWD}:cached
+      - ./mcp_settings.json:/root/.vscode-server/data/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json
       - ${HOME}/.ssh:/root/.ssh-host:ro
       - ${HOME}/.docker:/root/.docker:ro
       - /var/run/docker.sock:/var/run/docker.sock

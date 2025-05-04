@@ -1,5 +1,5 @@
 /cmd/cmd
 /.task
 /.env
-
-/mcp-server
+/cmd/client/client
+/.devcontainer/mcp_settings.json
