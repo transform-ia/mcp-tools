@@ -40,6 +40,40 @@ implement:
 - metrics
 - logs
 
+### Error handling
+
+An error value can't be ignored, the following are totally unacceptable.
+
+```golang
+value, _ := SomeFunction(param1, param2)
+```
+
+or for function that just return a single error as output:
+
+```golang
+SomeOtherFunction(param1)
+```
+
+error must be wrapped using package `github.com/pkg/errors`
+with the name of what generated the error, like:
+
+```golang
+value, err := SomeFunction(param1, param2)
+if err != nil {
+  return nil, errors.Wrap(err, "SomeFunction")
+}
+```
+
+if the caller `SomeFunction` do not really return a usefull error message regarding the
+parameters, those can be added to the wrap message:
+
+```golang
+value, err := SomeFunction(param1, param2)
+if err != nil {
+  return nil, errors.Wrapf(err, "SomeFunction(%q, %q)", param1, param2)
+}
+```
+
 ### Reformat
 
 When all the code had been implemented, run `golangci-lint-v2 fmt ./...` and then look at the code for the following
