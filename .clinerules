@@ -1,0 +1,112 @@
+# Project Guideline
+
+## Golang
+
+### Writing Code
+
+You have available a MCP server `godoc` and the tool `get_doc` that let you see the godoc of any packages (installed or not), type, function, etc as **Markdown** for you to quickly process it. Always use it as reference before writing code that can't work or not make sense:
+
+`get_doc` tool with `path`: `github.com/mark3labs/mcp-go/mcp` for a package or `github.com/mark3labs/mcp-go/mcp.WithDescription` for a specific function.
+
+If for any reason that server tool is not installed, stop and ask the user to add it to the project you are working on.
+
+If a package is installed, just run the command `go doc` followed by the package name, like `go doc github.com/mark3labs/mcp-go/mcp.NewResource`.
+
+If code needs to perform any HTTP calls, use the library `resty.dev/v3`.
+
+#### Coding style
+
+Always write code where variable names are meaningful, `i` is too short, `ok` as well.
+Use complete variable name, such as `instance`, `row`, `typeOk`.
+I don't want to have `golanci-lint-v2` complains later and you have to fix them later.
+Make good variable **first time**.
+
+Strings that are reusuable should be hold in `const` instead of being inline.
+
+#### Unused function variables
+
+Often, an interface or a type requires a function to have specific parameters.
+If a variable is **unused** mute it by naming it `_`. The most frequent case is
+`ctx context.Context` that is unused, just make it `_ context.Context`.
+
+### Telemetry
+
+All code must implement OpenTelemetry to be able to maintain that application in production.
+
+Look at godoc of `go.opentelemetry.io/otel` as the root Golang package for all the following features that you must
+implement:
+
+- traces
+- metrics
+- logs
+
+### Reformat
+
+When all the code had been implemented, run `golangci-lint-v2 fmt ./...` and then look at the code for the following
+problems:
+
+#### Comments at the end of a line
+
+If there is a line of code that
+
+```golang
+const (
+  keyLineAccountRef                = "accountRef"                    // Object { value: "accountID" } (within AccountBasedExpenseLineDetail)  
+)
+```
+
+move the comment to the previous line and rephrase it to make it more golang'ified like that:
+
+```golang
+const (
+  // keyLineAccountRef is Object { value: "accountID" } (within AccountBasedExpenseLineDetail)  
+	keyLineAccountRef                = "accountRef"
+)
+```
+
+### Lint
+
+Once code had been reformatted, run `golangci-lint-v2 run --fix ./...` and fix errors, here are some hints:
+
+#### lll
+
+##### Long line string
+
+If there is lines of string with more than 120 characters like
+
+```golang
+		Description: "Updates existing attachable metadata in QuickBooks (sparse update). Requires ID and SyncToken. Does NOT update file content.",
+```
+
+replace it with:
+
+```golang
+    Description: `Updates existing attachable metadata in QuickBooks (sparse
+update). Requires ID and SyncToken. Does NOT update file content.`,
+```
+
+just keep the line less than 120 characters.
+
+##### Long line of embeded struct
+
+if code is long like that
+
+```golang
+	emailSchema := map[string]any{
+		"type": "object", "properties": map[string]any{keyEmailAddress: map[string]any{"type": "string"}}, "required": []string{keyEmailAddress},
+	}
+```
+
+just split over multiple lines, `properties` do not need to be on the same line as `type`. `keyEmailAddress` too.
+Always split those structs over multiple lines.
+
+```golang
+	emailSchema := map[string]any{
+		"type": "object", "properties": map[string]any{keyEmailAddress: map[string]any{"type": "string"}}, "required": []string{keyEmailAddress},
+	}
+```
+
+#### revive
+
+`unused-parameter: parameter 'ctx' seems to be unused, consider removing or renaming it as _`.
+Actually do that every time the input parameter is an unused context.
