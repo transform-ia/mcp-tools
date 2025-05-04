@@ -1,4 +1,4 @@
-// Package main implements a CLI for github.com/metoro-io/mcp-golang
+// Package main implements a CLI for github.com/mark3labs/mcp-go
 // It reads a YAML config file and executes MCP tools through a server process
 package main
 
@@ -6,14 +6,12 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 
-	"github.com/metoro-io/mcp-golang/transport/stdio"
+	"github.com/mark3labs/mcp-go/client"
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
-
-	mcp "github.com/metoro-io/mcp-golang"
 )
 
 const minArgs = 2 // Minimum required command line arguments
@@ -61,77 +59,43 @@ func logic() error {
 		return errors.New("No server executable specified in config")
 	}
 
-	fmt.Printf("Preparing to execute server: %s\n", config.Server.Exec)
-	fmt.Printf("With arguments: %v\n", config.Server.Args)
-	fmt.Printf("Environment variables: %v\n", config.Server.Env)
-
 	// Validate server executable path is clean and safe
 	cleanExec := filepath.Clean(config.Server.Exec)
 	if cleanExec != config.Server.Exec {
 		return errors.New("Invalid server executable path")
 	}
 
-	// Validate command arguments
-	for _, arg := range config.Server.Args {
-		if arg == "" {
-			return errors.New("Empty command argument not allowed")
-		}
-	}
-
-	// Use absolute path for additional safety
 	absExec, err := filepath.Abs(cleanExec)
 	if err != nil {
 		return errors.Wrap(err, "Could not get absolute path for executable")
 	}
 
-	//nolint:gosec
-	cmd := exec.Command(absExec, config.Server.Args...)
+	// Convert env map to slice for NewStdioMCPClient
+	var (
+		index    int
+		envSlice = make([]string, len(config.Server.Env))
+	)
+
 	for k, v := range config.Server.Env {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
+		envSlice[index] = fmt.Sprintf("%s=%s", k, v)
+		index++
 	}
 
-	fmt.Println("Configured command with environment variables")
+	fmt.Printf("Creating MCP client via stdio for command: %s\n", absExec)
+	fmt.Printf("With arguments: %v\n", config.Server.Args)
+	fmt.Printf("Environment variables: %v\n", envSlice)
 
-	cmd.Stderr = os.Stderr
-
-	stdin, err := cmd.StdinPipe()
+	// Use NewStdioMCPClient - this handles process launch and communication
+	cli, err := client.NewStdioMCPClient(absExec, envSlice, config.Server.Args...)
 	if err != nil {
-		return errors.New("cmd.StdinPipe")
+		return errors.Wrap(err, "NewStdioMCPClient failed")
 	}
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return errors.Wrap(err, "cmd.StdinPipe")
-	}
-
-	fmt.Println("running: " + cmd.String())
-
-	if err = cmd.Start(); err != nil {
-		return errors.Wrap(err, "cmd.Start")
-	}
-
-	fmt.Println("Creating stdio transport...")
-
-	transport := stdio.NewStdioServerTransportWithIO(stdout, stdin)
-
-	fmt.Println("Creating MCP client...")
-
-	client := mcp.NewClient(transport)
-
-	go func() {
-		fmt.Println("Starting server process monitoring...")
-
-		if err = cmd.Wait(); err != nil {
-			fmt.Printf("Server process exited with error: %v\n", err)
-			os.Exit(1)
-		}
-
-		fmt.Println("Server process completed successfully")
-	}()
+	// No need for manual cmd, pipes, start, wait, or transport creation
 
 	fmt.Println("Initializing MCP client...")
 
-	if _, err = client.Initialize(context.Background()); err != nil {
+	// Use the new client variable 'cli' and qualify InitializeRequest with mcp package
+	if _, err = cli.Initialize(context.Background(), mcp.InitializeRequest{}); err != nil {
 		return errors.Wrap(err, "client.Initialize")
 	}
 
@@ -143,15 +107,42 @@ func logic() error {
 	for _, tool := range config.Tools {
 		fmt.Printf("Executing tool: %s with args: %v\n", tool.Name, tool.Arg)
 
-		result, err := client.CallTool(context.Background(), tool.Name, tool.Arg)
+		// Use the new client variable 'cli' and construct CallToolRequest correctly
+		// with nested Params struct and type assertion for Arguments.
+		var argsMap map[string]any
+
+		if tool.Arg != nil {
+			var ok bool
+
+			argsMap, ok = tool.Arg.(map[string]any)
+			if !ok {
+				return errors.Errorf("tool %s arguments are not a map[string]interface{}", tool.Name)
+			}
+		}
+
+		req := mcp.CallToolRequest{}
+		req.Params.Name = tool.Name
+		req.Params.Arguments = argsMap
+
+		result, err := cli.CallTool(context.Background(), req)
 		if err != nil {
 			return errors.Wrapf(err, "failed to call tool %s", tool.Name)
 		}
 
+		// Use type assertion via AsTextContent to get text result
+		var resultText string
+
 		if result != nil && len(result.Content) > 0 {
-			fmt.Printf("Tool %s completed successfully. Result: %v\n", tool.Name, result.Content[0].TextContent.Text)
+			contentItem := result.Content[0]
+			if textContent, ok := mcp.AsTextContent(contentItem); ok {
+				resultText = textContent.Text
+			}
+		}
+
+		if resultText != "" {
+			fmt.Printf("Tool %s completed successfully. Result: %s\n", tool.Name, resultText)
 		} else {
-			fmt.Printf("Tool %s completed with no output\n", tool.Name)
+			fmt.Printf("Tool %s completed with no text output\n", tool.Name)
 		}
 	}
 
