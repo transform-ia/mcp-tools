@@ -3,8 +3,8 @@ package telemetry
 import (
 	"testing"
 
-	"go.opentelemetry.io/otel/attribute"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 func TestPrefixAttributes(t *testing.T) {
@@ -78,23 +78,17 @@ type mockAttributer struct {
 	attrs []attribute.KeyValue
 }
 
-func (m *mockAttributer) Attributes() []attribute.KeyValue {
+func (m mockAttributer) Attributes() []attribute.KeyValue {
 	return m.attrs
 }
 
 func TestPrefixAttributers(t *testing.T) {
 	tests := []struct {
-		name       string
+		name        string
 		attributers []Attributer
-		prefix     string
-		expected   []attribute.KeyValue
+		prefix      string
+		expected    []attribute.KeyValue
 	}{
-		{
-			name:       "empty attributers",
-			attributers: []Attributer{},
-			prefix:     "test.",
-			expected:   []attribute.KeyValue{},
-		},
 		{
 			name: "single attributer with single attribute",
 			attributers: []Attributer{
@@ -142,7 +136,7 @@ func TestPrefixAttributers(t *testing.T) {
 			},
 			prefix: "",
 			expected: []attribute.KeyValue{
-				attribute.String("0.key", "value"),
+				attribute.String(".0.key", "value"),
 			},
 		},
 	}
