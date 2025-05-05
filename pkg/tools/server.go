@@ -136,13 +136,18 @@ func Serve(srv *server.MCPServer) error {
 
 	portStr := os.Getenv(key)
 	if len(portStr) != 0 {
-		port, err := strconv.ParseUint(portStr, 10, 8)
+		port, err := strconv.ParseUint(portStr, 10, 16)
 		if err != nil {
 			return errors.Wrapf(
 				err,
-				"Can't parse environment variable %q value %q is not a number",
-				key,
+				"invalid port number %q - must be between 1 and 65535",
 				portStr,
+			)
+		}
+		if port < 1 || port > 65535 {
+			return errors.Errorf(
+				"invalid port number %d - must be between 1 and 65535",
+				port,
 			)
 		}
 
