@@ -7,7 +7,7 @@ FROM golangci/golangci-lint:v2.1.6-alpine AS golangci
 # https://hub.docker.com/r/transformia/task/tags
 FROM transformia/task:3.43.2 AS task
 # https://hub.docker.com/_/golang
-FROM golang:1.24.2-alpine3.21
+FROM golang:1.24.4-alpine3.21
 COPY --from=hadolint /bin/hadolint /bin/hadolint
 COPY --from=golangci /usr/bin/golangci-lint /bin/golangci-lint-v2
 COPY --from=task /usr/local/bin/task /bin/task
