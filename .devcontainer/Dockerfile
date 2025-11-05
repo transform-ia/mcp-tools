@@ -3,7 +3,7 @@
 # https://hub.docker.com/r/hadolint/hadolint/tags
 FROM hadolint/hadolint:v2.12.0-alpine AS hadolint
 # https://hub.docker.com/r/golangci/golangci-lint/tags
-FROM golangci/golangci-lint:v2.1.6-alpine AS golangci
+FROM golangci/golangci-lint:v2.6.1-alpine AS golangci
 # https://hub.docker.com/r/transformia/task/tags
 FROM transformia/task:3.43.2 AS task
 # https://hub.docker.com/_/golang
