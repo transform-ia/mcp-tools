@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # https://hub.docker.com/r/hadolint/hadolint/tags
-FROM hadolint/hadolint:v2.12.0-alpine AS hadolint
+FROM hadolint/hadolint:v2.14.0-alpine AS hadolint
 # https://hub.docker.com/r/golangci/golangci-lint/tags
 FROM golangci/golangci-lint:v2.1.6-alpine AS golangci
 # https://hub.docker.com/r/transformia/task/tags
