@@ -3,7 +3,7 @@ module github.com/transform-ia/mcp-tools
 go 1.24
 
 require (
-	github.com/mark3labs/mcp-go v0.42.0
+	github.com/mark3labs/mcp-go v0.43.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/contrib/exporters/autoexport v0.60.0
